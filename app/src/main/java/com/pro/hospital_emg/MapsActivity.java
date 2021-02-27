@@ -156,7 +156,8 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onConnectionSuspended(int i)
+    {
 
     }
 
@@ -172,7 +173,7 @@ public class MapsActivity extends FragmentActivity implements
         MarkerOptions markerOptions=new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("user Current Location");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
         currentUserLocationMarker =mMap.addMarker(markerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(12));
@@ -183,7 +184,8 @@ public class MapsActivity extends FragmentActivity implements
 
     }
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    {
 
     }
 }
