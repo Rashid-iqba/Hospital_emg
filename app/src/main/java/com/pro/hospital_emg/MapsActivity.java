@@ -1,11 +1,5 @@
 package com.pro.hospital_emg;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -14,20 +8,26 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.internal.ICameraUpdateFactoryDelegate;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -48,6 +48,8 @@ public class MapsActivity extends FragmentActivity implements
     private Location lastLocation;
     private Marker currentUserLocationMarker;
     private static final  int Request_User_Location_code=99;
+    private  double latitude,longitude;
+    private  int proximityRadius = 10000;
 
 
 
@@ -73,8 +75,14 @@ public class MapsActivity extends FragmentActivity implements
 
     public void onClick(View v)
     {
+
+        String hospital ="hospital",medicine="medicine", restaurant ="restaurant";
+        Object transferData[] =new Object[2];
+        GetNearbyPlaces getNearbyPlaces =new GetNearbyPlaces();
+
         switch (v.getId())
         {
+
             case R.id.search_address:
                 EditText addressField = (EditText) findViewById(R.id.location_search);
                 String address = addressField.getText().toString();
@@ -123,11 +131,47 @@ public class MapsActivity extends FragmentActivity implements
                     Toast.makeText(this,"please write any location name",Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case  R.id.hospital_nearby:
+                mMap.clear();
+                String url = getUrl (latitude, longitude ,hospital);
+                transferData[0]=mMap;
+                transferData[1]=url;
+
+                getNearbyPlaces.execute(transferData);
+                Toast.makeText(this,"Searching for Nearby Hospitals...",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Showing Nearby hospitals...",Toast.LENGTH_SHORT).show();
+
+                break;
+
+
+            case  R.id.medicine_nearby:
+                mMap.clear();
+                url = getUrl(latitude, longitude, medicine);
+                transferData[0]=mMap;
+                transferData[1]=url;
+
+                getNearbyPlaces.execute(transferData);
+                Toast.makeText(this,"Searching for Nearby medicine..",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Showing Nearby medicine...",Toast.LENGTH_SHORT).show();
+
+                break;
 
         }
     }
 
+private String getUrl (double latitude,double longitude ,String nearbyPlace)
+{
+   StringBuilder googleURL = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+   googleURL.append("location="+latitude+","+ longitude);
+   googleURL.append("&radius="+ proximityRadius);
+   googleURL.append("&type=" +nearbyPlace);
+    googleURL.append("&sensor=true");
+    googleURL.append("&key" + "AIzaSyAX0rcKxrQBuFZsFEKfWgrhRETxFf9_pzc");
 
+    Log.d("GoogleMapActivity","url ="+ googleURL.toString());
+
+    return  googleURL.toString();
+}
 
 
 
@@ -234,6 +278,9 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onLocationChanged(@NonNull Location location)
     {
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
         lastLocation=location;
         if (currentUserLocationMarker != null)
         {
